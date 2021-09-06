@@ -41,10 +41,10 @@ class Title(models.Model):
     name = models.CharField('Название', max_length=200)
     year = models.SmallIntegerField('Год', choices=YEAR_CHOICES)
     description = models.TextField('Описание', max_length=200)
-    genre = models.ManyToManyField('Genre', through='TitleGenre')  ###
+    genre = models.ManyToManyField('Genre', through='TitleGenre')
     category = models.ForeignKey(
         'Category',
-        on_delete=models.SET_NULL,  ### SET_NULL???
+        on_delete=models.SET_NULL,  # SET_NULL???
         null=True,
         related_name='titles'
     )

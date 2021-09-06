@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}404{% endblock %}
+{% block content %}
+
+<div class="row">
+  <div class="col-md-12">
+    <h1>not found 404</h1>
+    <p class="lead">Page <code>{{ path }}</code> not found</p>
+    <p class="lead"><a href="{% url 'reviews:index' %}">return</a></p>
+  </div>
+</div>
+
+{% endblock %}
