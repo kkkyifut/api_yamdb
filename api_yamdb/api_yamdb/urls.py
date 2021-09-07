@@ -8,11 +8,8 @@ handler500 = 'reviews.views.server_error'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('redoc/', TemplateView.as_view(template_name='redoc.html'),
+         name='redoc'),
+    path('api/', include('api.urls', namespace='api-v1')),
     path('', include('reviews.urls', namespace='reviews')),
-    path(
-        'redoc/',
-        TemplateView.as_view(template_name='redoc.html'),
-        name='redoc'
-    ),
-    path('api/', include('api.urls')),
 ]

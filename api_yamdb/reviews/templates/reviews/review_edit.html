@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load thumbnail %}
+{% block title %}
+{% if review.pk %}
+Редактирование записи
+{% else %}
+Новая запись
+{% endif %}
+{% endblock %}
+{% block content %}
+<main role="main" class="container">
+  <div class="row">
+    <div class="col-md-9">
+      {% if review.pk %}
+      <div class="card mb-3 mt-1 shadow-sm">
+        <div class="card-body">
+          <p class="card-text">
+            <a href="">
+              <strong class="d-block text-gray-dark">
+                {{ user.username }}
+              </strong>
+            </a>
+          <p>{{ review.text|linebreaksbr }}</p>
+          </p>
+          <hr>
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="btn-group">
+            </div>
+            <small class="text-muted">{{ review.pub_date|date:"d E Y" }} г.</small>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      {% endif %}
+      <div class="card mb-3 mt-1 shadow-sm">
+        {% url 'edit' as action_url %}
+        <div class="card-header">
+          {% if review.pk %}
+          Редактирование записи
+          {% else %}
+          Новая запись
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <form method="POST" enctype="multipart/form-data" action="{{ action_url }}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="page-link">Сохранить</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+{% endblock %}

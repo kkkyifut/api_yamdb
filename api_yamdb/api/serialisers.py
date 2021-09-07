@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from users.models import User
+from users.models import User, Review, Comment, Title
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
@@ -36,3 +36,27 @@ class UserSerializer(serializers.ModelSerializer):
             'bio',
             'role'
         )
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    title = serializers.SlugRelatedField(
+        slug_field='id', queryset=Title.objects.all(), required=False
+    )
+    author = serializers.CharField(source='author.username', read_only=True)
+    comments = serializers.SlugRelatedField(
+        slug_field='text', queryset=Comment.objects.all(),
+        many=True, required=False
+    )
+
+    class Meta:
+        model = Review
+        fields = '__all__'
+        read_only_fields = ('author',)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.CharField(source='author.username', read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = '__all__'

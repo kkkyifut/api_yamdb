@@ -6,10 +6,9 @@
 {% cache 20 index_page %}
 
 <div class="container">
-  {% include "misc/menu.html" with index=True %}
 
   {% for review in page %}
-  {% include "reviews/card_reviews.html" %}
+  {% include "reviews/card_review.html" %}
   {% endfor %}
 
 </div>

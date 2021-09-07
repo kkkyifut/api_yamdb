@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Запись{% endblock %}
+{% block content %}
+{% load user_filters %}
+<main role="main" class="container">
+  <div class="row">
+    <div class="col-md-9">
+      {% include "reviews/card_review.html" %}
+      {% load user_filters %}
+      {% if user.is_authenticated %}
+      <div class="card my-4">
+        <form method="review" action="{% url 'reviews:review' author review.pk %}">
+          {% csrf_token %}
+          <h5 class="card-header">Добавить комментарий:</h5>
+          <div class="card-body">
+            <div class="form-group">
+              {{ form.text|addclass:"form-control" }}
+            </div>
+            <button type="submit" class="btn btn-primary">Отправить</button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+      {% for comment in page %}
+      <div class="media card mb-4">
+        <div class="media-body card-body">
+          <h5 class="mt-0">
+            {{ comment.author.full_name }}
+          </h5>
+          <p>{{ comment.text|linebreaksbr }}</p>
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">{{ comment.created|date:"H:i, d.m.Y" }}</small>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      {% include "misc/paginator.html" %}
+    </div>
+  </div>
+</main>
+{% endblock %}
