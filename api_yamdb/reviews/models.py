@@ -12,7 +12,7 @@ SCORE_CHOICES = [(r, r) for r in range(1, 11)]
 
 def validate_year(value):
     if value < 0 and value > datetime.date.today().year:
-        raise ValidationError(f'0 < year < {datetime.date.today().year}')
+        raise ValidationError(f'0 < year <= {datetime.date.today().year}')
 
 
 class Title(models.Model):
