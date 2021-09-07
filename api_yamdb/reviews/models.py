@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from api_yamdb.users.models import User
+from users.models import User
 
 # YEAR_CHOICES = [(r, r) for r in range(1000, datetime.date.today().year)]
 SCORE_CHOICES = [(r, r) for r in range(1, 11)]
