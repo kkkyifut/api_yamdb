@@ -7,7 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .permissions import IsAuthorOrReadOnly
 from .serialisers import (UserSignupSerializer, UserGetTokenSerializer,
-                          UserSerializer)  #, ReviewSerializer, CommentSerializer)
+                          UserSerializer, ReviewSerializer, CommentSerializer)
 from users.models import User
 from reviews.models import Review, Comment, Title
 
@@ -52,22 +52,22 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
 
 
-# class ReviewViewSet(viewsets.ModelViewSet):
-#     queryset = Review.objects.all()
-#     serializer_class = ReviewSerializer
-#     permission_classes = (IsAuthorOrReadOnly,)
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = (IsAuthorOrReadOnly,)
 
-#     def perform_create(self, serializer):
-#         serializer.save(author=self.request.user)
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
 
-# class CommentViewSet(viewsets.ModelViewSet):
-#     serializer_class = CommentSerializer
-#     permission_classes = (IsAuthorOrReadOnly,)
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = (IsAuthorOrReadOnly,)
 
-#     def get_queryset(self):
-#         review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
-#         return review.comments.all()
+    def get_queryset(self):
+        review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
+        return review.comments.all()
 
-#     def perform_create(self, serializer):
-#         serializer.save(author=self.request.user)
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
