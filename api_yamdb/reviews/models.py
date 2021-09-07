@@ -1,18 +1,23 @@
 import datetime
 
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from api_yamdb.users.models import User
 
-# здесь надо подумать над диапазоном годов (может же быть и до н.э. произведение)
-YEAR_CHOICES = [(r, r) for r in range(1000, datetime.date.today().year)]
+# YEAR_CHOICES = [(r, r) for r in range(1000, datetime.date.today().year)]
 SCORE_CHOICES = [(r, r) for r in range(1, 11)]
+
+
+def validate_year(value):
+    if value < 0 and value > datetime.date.today().year:
+        raise ValidationError(f'0 < year < {datetime.date.today().year}')
 
 
 class Title(models.Model):
     name = models.CharField('Название', max_length=200)
-    year = models.SmallIntegerField('Год', choices=YEAR_CHOICES)
+    year = models.SmallIntegerField('Год', validators=[validate_year])
     description = models.TextField('Описание', max_length=200)
     genre = models.ManyToManyField('Genre', through='TitleGenre')
     category = models.ForeignKey(
