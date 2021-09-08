@@ -6,7 +6,6 @@ from django.db import models
 
 from users.models import User
 
-# YEAR_CHOICES = [(r, r) for r in range(1000, datetime.date.today().year)]
 SCORE_CHOICES = [(r, r) for r in range(1, 11)]
 
 
@@ -18,7 +17,12 @@ def validate_year(value):
 class Title(models.Model):
     name = models.CharField('Название', max_length=200)
     year = models.SmallIntegerField('Год', validators=[validate_year])
-    description = models.TextField('Описание', max_length=200)
+    description = models.TextField(
+        'Описание',
+        max_length=200,
+        blank=True,
+        null=True
+    )
     genre = models.ManyToManyField('Genre', through='TitleGenre')
     category = models.ForeignKey(
         'Category',
@@ -26,6 +30,9 @@ class Title(models.Model):
         null=True,
         related_name='titles'
     )
+
+    class Meta:
+        ordering = ['-year']
 
 
 class Category(models.Model):
@@ -58,6 +65,9 @@ class Review(models.Model):
         related_name='reviews'
     )
 
+    class Meta:
+        ordering = ['-pub_date']
+
 
 class Comment(models.Model):
     text = models.TextField(verbose_name='Текст')
@@ -75,3 +85,6 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments'
     )
+
+    class Meta:
+        ordering = ['-pub_date']
