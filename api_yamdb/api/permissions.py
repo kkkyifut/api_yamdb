@@ -18,15 +18,31 @@ class IsAdminOrSuperuserOnly(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        return (
-                request.user.is_authenticated
-                and (request.user.is_superuser or request.user.role == 'admin')
-        )
+        return request.user.is_superuser or request.user.role == 'admin'
 
 
 # Для доступа к ресурсам Review и Comment
-# этот пермишен не накладывает ограничения на права админа и суперюзера,
+# этот пермишен не накладывает ограничения на админа и суперюзера
 class IsModeratorOrAuthorOrReadOnly(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        return (
+                request.method in permissions.SAFE_METHODS
+                or request.user.is_authenticated
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return (
+                request.method in permissions.SAFE_METHODS
+                or request.user.is_superuser
+                or request.user.role == 'admin'
+                or request.user.role == 'moderator'
+                or obj.author == request.user
+        )
+
+
+# Для доступа к ресурсам Title, Category, Genre
+class IsAdminOrReadOnly(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return request.method in permissions.SAFE_METHODS
@@ -39,8 +55,6 @@ class IsModeratorOrAuthorOrReadOnly(permissions.BasePermission):
                         and (
                                 request.user.is_superuser
                                 or request.user.role == 'admin'
-                                or request.user.role == 'moderator'
-                                or obj.author == request.user
                         )
                 )
         )
