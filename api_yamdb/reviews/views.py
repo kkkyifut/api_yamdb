@@ -18,8 +18,9 @@ def index(request) -> HttpResponse:
     return render(request, 'index.html', context)
 
 
-# def title_view(request, username, title_id) -> HttpResponse:
-    # """view-функция для просмотра постера"""
+def titles(request, username, title_id) -> HttpResponse:
+    """view-функция для просмотра постера"""
+    pass
 
 
 def review_view(request, username, review_id) -> HttpResponse:
