@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from users.models import User
-from reviews.models import Review, Comment, Title, Category, Genre
+from reviews.models import Review, Comment, Title
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
@@ -37,33 +37,6 @@ class UserSerializer(serializers.ModelSerializer):
             'bio',
             'role'
         )
-
-
-class CategorySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Category
-        exclude = ["id"]
-
-
-class GenreSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Genre
-        exclude = ["id"]
-
-
-class TitleSerializer(serializers.ModelSerializer):
-    genre = serializers.SlugRelatedField(
-        many=True, slug_field="slug", queryset=Genre.objects.all()
-    )
-    category = serializers.SlugRelatedField(
-        slug_field="slug", queryset=Category.objects.all()
-    )
-
-    class Meta:
-        model = Title
-        fields = "__all__"
 
 
 class ReviewSerializer(serializers.ModelSerializer):
