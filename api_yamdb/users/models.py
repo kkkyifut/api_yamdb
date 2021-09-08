@@ -34,6 +34,9 @@ class User(AbstractUser):
         null=True,
     )
 
+    class Meta:
+        ordering = ['-date_joined']
+
 
 def post_save_user(sender, **kwargs):
     if kwargs['created']:
