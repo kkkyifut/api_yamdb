@@ -1,5 +1,6 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework import status, serializers, viewsets
+from rest_framework import status, serializers, viewsets, filters
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -7,9 +8,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .permissions import IsAuthorOrReadOnly
 from .serialisers import (UserSignupSerializer, UserGetTokenSerializer,
-                          UserSerializer, ReviewSerializer, CommentSerializer)
+                          UserSerializer, ReviewSerializer, CommentSerializer,
+                          TitleSerializer, CategorySerializer, GenreSerializer)
 from users.models import User
-from reviews.models import Review, Comment, Title
+from reviews.models import Review, Comment, Title, Category, Genre
 
 
 class APIUserSignup(APIView):
@@ -50,6 +52,30 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all().annotate(rating=Avg("reviews__score"))
+    serializer_class = TitleSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Category.objects.all()
+    lookup_field = 'slug'
+    serializer_class = CategorySerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ("name",)
+
+
+class GenreViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Genre.objects.all()
+    lookup_field = 'slug'
+    serializer_class = GenreSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ("name",)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
