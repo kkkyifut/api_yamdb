@@ -39,10 +39,16 @@ class Category(models.Model):
     name = models.CharField('Название', max_length=100)
     slug = models.SlugField()
 
+    class Meta:
+        ordering = ['-id']
+
 
 class Genre(models.Model):
     name = models.CharField('Название', max_length=100)
     slug = models.SlugField()
+
+    class Meta:
+        ordering = ['-id']
 
 
 class TitleGenre(models.Model):
