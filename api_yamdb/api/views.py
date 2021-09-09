@@ -1,15 +1,16 @@
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework import status, serializers, viewsets, filters
-from rest_framework.permissions import AllowAny
+from rest_framework import status, serializers, viewsets, filters, mixins
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .permissions import IsAuthorOrReadOnly
+from .permissions import IsAuthorOrReadOnly, IsAdminOrSuperuserOnly
 from .serialisers import (UserSignupSerializer, UserGetTokenSerializer,
                           UserSerializer, ReviewSerializer, CommentSerializer,
-                          TitleSerializer, CategorySerializer, GenreSerializer)
+                          TitleSerializer, CategorySerializer, GenreSerializer,
+                          UserMeSerializer)
 from users.models import User
 from reviews.models import Review, Comment, Title, Category, Genre
 
@@ -50,6 +51,25 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+    permission_classes = (IsAdminOrSuperuserOnly,)
+
+
+class UpdateRetrieveViewSet(mixins.UpdateModelMixin, mixins.RetrieveModelMixin,
+                            viewsets.GenericViewSet):
+    pass
+
+
+class UserMeViewSet(UpdateRetrieveViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserMeSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, id=self.request.user.id)
+        return obj
 
 
 class TitleViewSet(viewsets.ModelViewSet):
