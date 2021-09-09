@@ -15,7 +15,6 @@ from reviews.models import Review, Comment, Title, Category, Genre
 
 
 class APIUserSignup(APIView):
-    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = UserSignupSerializer(data=request.data)
@@ -26,7 +25,6 @@ class APIUserSignup(APIView):
 
 
 class APIUserGetToken(APIView):
-    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = UserGetTokenSerializer(data=request.data)
