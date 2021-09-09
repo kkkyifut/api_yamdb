@@ -14,30 +14,9 @@ def validate_year(value):
         raise ValidationError(f'0 < year <= {datetime.date.today().year}')
 
 
-class Title(models.Model):
-    name = models.CharField('Название', max_length=200)
-    year = models.SmallIntegerField('Год', validators=[validate_year])
-    description = models.TextField(
-        'Описание',
-        max_length=200,
-        blank=True,
-        null=True
-    )
-    genre = models.ManyToManyField('Genre', through='TitleGenre')
-    category = models.ForeignKey(
-        'Category',
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='titles'
-    )
-
-    class Meta:
-        ordering = ['-year']
-
-
 class Category(models.Model):
     name = models.CharField('Название', max_length=100)
-    slug = models.SlugField()
+    slug = models.SlugField(unique=True)
 
     class Meta:
         ordering = ['-id']
@@ -45,10 +24,29 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField('Название', max_length=100)
-    slug = models.SlugField()
+    slug = models.SlugField(unique=True)
 
     class Meta:
         ordering = ['-id']
+
+
+class Title(models.Model):
+    name = models.CharField('Название', max_length=200)
+    year = models.SmallIntegerField(
+        'Год', validators=[validate_year], db_index=True
+    )
+    description = models.TextField(
+        'Описание', max_length=200, blank=True, null=True
+    )
+    genre = models.ManyToManyField(
+        Genre, through='TitleGenre', related_name='titles'
+    )
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True, related_name='titles'
+    )
+
+    class Meta:
+        ordering = ['-year']
 
 
 class TitleGenre(models.Model):
@@ -59,16 +57,14 @@ class TitleGenre(models.Model):
 class Review(models.Model):
     text = models.TextField(verbose_name='Текст')
     author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='reviews'
+        User, related_name='reviews', on_delete=models.CASCADE,
     )
-    score = models.PositiveSmallIntegerField('Оценка', choices=SCORE_CHOICES)
+    score = models.PositiveSmallIntegerField(
+        'Оценка', default=1, null=False, choices=SCORE_CHOICES
+    )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE,
-        related_name='reviews'
+        Title, related_name='reviews', on_delete=models.CASCADE
     )
 
     class Meta:
@@ -78,18 +74,13 @@ class Review(models.Model):
 class Comment(models.Model):
     text = models.TextField(verbose_name='Текст')
     author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='comments'
+        User, on_delete=models.CASCADE, related_name='comments'
     )
     pub_date = models.DateTimeField(
-        'Дата публикации',
-        auto_now_add=True
+        'Дата публикации', auto_now_add=True, db_index=True
     )
     review = models.ForeignKey(
-        Review,
-        on_delete=models.CASCADE,
-        related_name='comments'
+        Review, on_delete=models.CASCADE, related_name='comments'
     )
 
     class Meta:
