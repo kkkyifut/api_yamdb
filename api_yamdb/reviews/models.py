@@ -18,6 +18,9 @@ class Category(models.Model):
     name = models.CharField('Название', max_length=100)
     slug = models.SlugField(unique=True)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         ordering = ['-id']
 
@@ -25,6 +28,9 @@ class Category(models.Model):
 class Genre(models.Model):
     name = models.CharField('Название', max_length=100)
     slug = models.SlugField(unique=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         ordering = ['-id']
@@ -44,6 +50,9 @@ class Title(models.Model):
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, null=True, related_name='titles'
     )
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         ordering = ['-year']
@@ -67,6 +76,9 @@ class Review(models.Model):
         Title, related_name='reviews', on_delete=models.CASCADE
     )
 
+    def __str__(self):
+        return(f'{self.id}. {self.text[:50]}')
+
     class Meta:
         ordering = ['-pub_date']
 
@@ -82,6 +94,9 @@ class Comment(models.Model):
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name='comments'
     )
+    
+    def __str__(self):
+        return self.text[:50]
 
     class Meta:
         ordering = ['-pub_date']

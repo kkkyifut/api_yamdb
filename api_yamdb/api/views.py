@@ -1,17 +1,19 @@
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import status, serializers, viewsets, filters, mixins
+from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .permissions import (IsAdminOrSuperuserOnly,
                           IsModeratorOrAuthorOrReadOnly, IsAdminOrReadOnly)
 from .serialisers import (UserSignupSerializer, UserGetTokenSerializer,
                           UserSerializer, ReviewSerializer, CommentSerializer,
-                          TitleSerializer, CategorySerializer, GenreSerializer,
-                          UserMeSerializer)
+                          CategorySerializer, GenreSerializer, UserMeSerializer,
+                          TitleReadSerializer, TitleWriteSerializer)
 from users.models import User
 from reviews.models import Review, Comment, Title, Category, Genre
 
@@ -74,36 +76,56 @@ class UserMeViewSet(UpdateRetrieveViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all().annotate(rating=Avg("reviews__score"))
-    serializer_class = TitleSerializer
+    queryset = Title.objects.annotate(rating=Avg("reviews__score"))
     permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return TitleReadSerializer
+        return TitleWriteSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save()
 
 
-class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
-    lookup_field = 'slug'
     serializer_class = CategorySerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ("name",)
     permission_classes = (IsAdminOrReadOnly,)
-
-
-class GenreViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Genre.objects.all()
+    search_fields = ('name',)
     lookup_field = 'slug'
+
+    def retrieve(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def update(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class GenreViewSet(viewsets.ModelViewSet):
+    queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ("name",)
     permission_classes = (IsAdminOrReadOnly,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
+
+    def retrieve(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def update(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = (IsModeratorOrAuthorOrReadOnly,)
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        return title.reviews.all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
