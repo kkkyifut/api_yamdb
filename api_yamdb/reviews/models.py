@@ -3,7 +3,6 @@ import datetime
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
-
 from users.models import User
 
 SCORE_CHOICES = [(r, r) for r in range(1, 11)]
@@ -69,7 +68,7 @@ class Review(models.Model):
         User, related_name='reviews', on_delete=models.CASCADE,
     )
     score = models.PositiveSmallIntegerField(
-        'Оценка', default=1, null=False, choices=SCORE_CHOICES
+        'Оценка', default=1, blank=False, null=False, choices=SCORE_CHOICES
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     title = models.ForeignKey(
@@ -89,12 +88,12 @@ class Comment(models.Model):
         User, on_delete=models.CASCADE, related_name='comments'
     )
     pub_date = models.DateTimeField(
-        'Дата публикации', auto_now_add=True, db_index=True
+        'Дата публикации', auto_now_add=True
     )
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name='comments'
     )
-    
+
     def __str__(self):
         return self.text[:50]
 

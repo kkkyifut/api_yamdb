@@ -1,21 +1,23 @@
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework import status, serializers, viewsets, filters, mixins
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, serializers, status, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from django_filters.rest_framework import DjangoFilterBackend
-
-from .permissions import (IsAdminOrSuperuserOnly,
-                          IsModeratorOrAuthorOrReadOnly, IsAdminOrReadOnly)
-from .serialisers import (UserSignupSerializer, UserGetTokenSerializer,
-                          UserSerializer, ReviewSerializer, CommentSerializer,
-                          CategorySerializer, GenreSerializer, UserMeSerializer,
-                          TitleReadSerializer, TitleWriteSerializer)
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
-from reviews.models import Review, Comment, Title, Category, Genre
+
+from .filters import TitleFilter
+from .permissions import (IsAdminOrReadOnly, IsAdminOrSuperuserOnly,
+                          IsModeratorOrAuthorOrReadOnly)
+from .serialisers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer,
+                          TitleReadSerializer, TitleWriteSerializer,
+                          UserGetTokenSerializer, UserMeSerializer,
+                          UserSerializer, UserSignupSerializer)
 
 
 class APIUserSignup(APIView):
@@ -79,6 +81,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(rating=Avg("reviews__score"))
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
@@ -128,7 +131,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -136,8 +140,15 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (IsModeratorOrAuthorOrReadOnly,)
 
     def get_queryset(self):
-        review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
+        review = get_object_or_404(
+            Review, id=self.kwargs['review_id'],
+            title__id=self.kwargs['title_id']
+        )
         return review.comments.all()
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        review = get_object_or_404(
+            Review, id=self.kwargs['review_id'],
+            title__id=self.kwargs['title_id']
+        )
+        serializer.save(author=self.request.user, review=review)

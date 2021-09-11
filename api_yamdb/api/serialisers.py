@@ -1,6 +1,6 @@
 from rest_framework import serializers
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
-from reviews.models import Review, Comment, Title, Category, Genre
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
@@ -69,7 +69,7 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleReadSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
-    id = serializers.IntegerField()
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
@@ -83,7 +83,6 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(), slug_field='slug'
     )
-    id = serializers.IntegerField()
 
     class Meta:
         model = Title
@@ -94,20 +93,19 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True, many=False
     )
-    id = serializers.IntegerField()
 
     class Meta:
         model = Review
         fields = '__all__'
+        read_only_fields = ('id', 'title', 'pub_date')
 
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True, many=False
     )
-    review_id = serializers.IntegerField()
-    id = serializers.IntegerField()
 
     class Meta:
         model = Comment
         fields = '__all__'
+        read_only_fields = ('id', 'review', 'pub_date')
