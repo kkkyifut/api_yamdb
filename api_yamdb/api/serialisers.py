@@ -94,6 +94,19 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username', read_only=True, many=False
     )
 
+    def validate(self, data):
+        if self.context['request'].method != 'POST':
+            return data
+        # print(data)
+        author = self.context['request'].user
+        title_id = self.context['view'].kwargs['title_id']
+        # print(Review.objects.filter(author=author, title_id=title_id).exists())
+        if Review.objects.filter(author=author, title_id=title_id).exists():
+            raise serializers.ValidationError(
+                'Нельзя дважды оставить отзыв на одно произведение'
+            )
+        return data
+
     class Meta:
         model = Review
         fields = '__all__'
