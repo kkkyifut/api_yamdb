@@ -1,4 +1,3 @@
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, serializers, status, viewsets
@@ -15,7 +14,7 @@ from .permissions import (IsAdminOrReadOnly, IsAdminOrSuperuserOnly,
                           IsModeratorOrAuthorOrReadOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
-                          TitleReadSerializer, TitleWriteSerializer,
+                          TitleSerializer, TitleRatingSerializer,
                           UserGetTokenSerializer, UserMeSerializer,
                           UserSerializer, UserSignupSerializer)
 
@@ -78,18 +77,15 @@ class UserMeViewSet(UpdateRetrieveViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(rating=Avg("reviews__score"))
+    queryset = Title.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return TitleReadSerializer
-        return TitleWriteSerializer
-
-    def perform_create(self, serializer):
-        serializer.save()
+        if self.action in ('create', 'update', 'partial_update'):
+            return TitleSerializer
+        return TitleRatingSerializer
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
