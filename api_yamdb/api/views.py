@@ -13,7 +13,7 @@ from users.models import User
 from .filters import TitleFilter
 from .permissions import (IsAdminOrReadOnly, IsAdminOrSuperuserOnly,
                           IsModeratorOrAuthorOrReadOnly)
-from .serialisers import (CategorySerializer, CommentSerializer,
+from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
                           UserGetTokenSerializer, UserMeSerializer,
