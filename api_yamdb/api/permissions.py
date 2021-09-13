@@ -8,8 +8,8 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
                 or obj.author == request.user)
 
 
-# Для доступа к ресурсу Users
 class IsAdminOrSuperuserOnly(permissions.BasePermission):
+    """Разрешение на доступ к ресурсу Users."""
 
     def has_permission(self, request, view):
         return (
@@ -21,9 +21,9 @@ class IsAdminOrSuperuserOnly(permissions.BasePermission):
         return request.user.is_superuser or request.user.role == 'admin'
 
 
-# Для доступа к ресурсам Review и Comment
-# этот пермишен не накладывает ограничения на админа и суперюзера
 class IsModeratorOrAuthorOrReadOnly(permissions.BasePermission):
+    """Разрешение на доступ к ресурсам Review и Comment.
+       Не накладывает ограничения на админа и суперпользователя."""
 
     def has_permission(self, request, view):
         return (
@@ -41,8 +41,8 @@ class IsModeratorOrAuthorOrReadOnly(permissions.BasePermission):
         )
 
 
-# Для доступа к ресурсам Title, Category, Genre
 class IsAdminOrReadOnly(permissions.BasePermission):
+    """Разрешение на доступ к ресурсам Title, Category, Genre."""
 
     def has_permission(self, request, view):
         return (

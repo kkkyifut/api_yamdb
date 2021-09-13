@@ -3,6 +3,7 @@ import datetime
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
+
 from users.models import User
 
 SCORE_CHOICES = [(r, r) for r in range(1, 11)]
