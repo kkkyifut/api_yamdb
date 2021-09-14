@@ -3,7 +3,7 @@ from rest_framework.routers import SimpleRouter
 
 from .views import (APIUserGetToken, APIUserSignup, CategoryViewSet,
                     CommentViewSet, GenreViewSet, ReviewViewSet, TitleViewSet,
-                    UserViewSet)
+                    UserViewSet, APIUserRemindConfirmationCode)
 
 app_name = 'api-v1'
 
@@ -24,4 +24,5 @@ urlpatterns = [
     path('v1/', include(router_v1.urls)),
     path('v1/auth/signup/', APIUserSignup.as_view()),
     path('v1/auth/token/', APIUserGetToken.as_view()),
+    path('v1/auth/remind/', APIUserRemindConfirmationCode.as_view()),
 ]

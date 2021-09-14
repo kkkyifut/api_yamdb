@@ -10,6 +10,7 @@ from rest_framework.decorators import action
 
 from reviews.models import Category, Genre, Review, Title
 from users.models import User
+from users.utilities import remind_confirmation_code
 from .filters import TitleFilter
 from .permissions import (IsAdminOrReadOnly, IsAdminOrSuperuserOnly,
                           IsModeratorOrAuthorOrReadOnly)
@@ -19,7 +20,6 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           UserGetTokenSerializer, UserMeSerializer,
                           UserSerializer, UserSignupSerializer,
                           UserRemindConfirmationCodeSerializer)
-from users.utilities import remind_confirmation_code
 
 
 class APIUserSignup(APIView):
@@ -58,16 +58,14 @@ class APIUserRemindConfirmationCode(APIView):
     def post(self, request):
         serializer = UserRemindConfirmationCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        username = serializer.data['username']
-        email = serializer.data['email']
-        if User.objects.filter(username=username, email=email).exists():
-            user = get_object_or_404(User, username=username)
-            remind_confirmation_code(user)
-            return Response(
-                data=serializer.data,
-                status=status.HTTP_200_OK
-            )
-        raise serializers.ValidationError('Неверные username или email')
+        username = serializer.validated_data['username']
+        email = serializer.validated_data['email']
+        user = get_object_or_404(User, username=username, email=email)
+        remind_confirmation_code(user)
+        data = {
+            'message': 'На Вашу почту отправлено письмо с кодом подтверждения'
+        }
+        return Response(data=data, status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
