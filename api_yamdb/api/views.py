@@ -1,7 +1,7 @@
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, serializers, status, viewsets
+from rest_framework import filters, serializers, status, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -43,7 +43,7 @@ class APIUserGetToken(APIView):
             username=serializer.validated_data['username']
         )
         if serializer.validated_data[
-            'confirmation_code'] == user.confirmation_code:
+                'confirmation_code'] == user.confirmation_code:
             refresh = RefreshToken.for_user(user)
             token = str(refresh.access_token)
             data = {
