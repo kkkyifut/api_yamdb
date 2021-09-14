@@ -14,34 +14,38 @@ def validate_year(value):
 
 
 class Category(models.Model):
-    name = models.CharField('Название', max_length=100)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(verbose_name='Название', max_length=100)
+    slug = models.SlugField(verbose_name='slug', unique=True)
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        ordering = ['-id']
 
     def __str__(self):
         return self.name
-
-    class Meta:
-        ordering = ['-id']
 
 
 class Genre(models.Model):
-    name = models.CharField('Название', max_length=100)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(verbose_name='Наименование', max_length=100)
+    slug = models.SlugField(verbose_name='slug', unique=True)
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+        ordering = ['-id']
 
     def __str__(self):
         return self.name
 
-    class Meta:
-        ordering = ['-id']
-
 
 class Title(models.Model):
-    name = models.CharField('Название', max_length=200)
+    name = models.CharField(verbose_name='Название', max_length=200)
     year = models.SmallIntegerField(
-        'Год', validators=[validate_year], db_index=True
+        verbose_name='Год', validators=[validate_year], db_index=True
     )
     description = models.TextField(
-        'Описание', max_length=200, blank=True, null=True
+        verbose_name='Описание', max_length=200, blank=True, null=True
     )
     genre = models.ManyToManyField(
         Genre, through='TitleGenre', related_name='titles'
@@ -50,11 +54,13 @@ class Title(models.Model):
         Category, on_delete=models.SET_NULL, null=True, related_name='titles'
     )
 
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+        ordering = ['-year']
+
     def __str__(self):
         return self.name
-
-    class Meta:
-        ordering = ['-year']
 
 
 class TitleGenre(models.Model):
