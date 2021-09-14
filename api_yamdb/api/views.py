@@ -13,6 +13,7 @@ from reviews.models import Category, Genre, Review, Title
 from users.models import User
 from users.utilities import remind_confirmation_code
 from .filters import TitleFilter
+from .mixins import ListCreateDeleteViewSet
 from .permissions import (IsAdminOrReadOnly, IsAdminOrSuperuserOnly,
                           IsModeratorOrAuthorOrReadOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
@@ -117,10 +118,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleRatingSerializer
 
 
-class CategoryViewSet(mixins.CreateModelMixin,
-                      mixins.ListModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
+class CategoryViewSet(ListCreateDeleteViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = [filters.SearchFilter]
@@ -129,10 +127,7 @@ class CategoryViewSet(mixins.CreateModelMixin,
     lookup_field = 'slug'
 
 
-class GenreViewSet(mixins.CreateModelMixin,
-                   mixins.ListModelMixin,
-                   mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet):
+class GenreViewSet(ListCreateDeleteViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = [filters.SearchFilter]
