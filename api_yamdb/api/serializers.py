@@ -27,6 +27,15 @@ class UserGetTokenSerializer(serializers.ModelSerializer):
         fields = ('username', 'confirmation_code')
 
 
+class UserRemindConfirmationCodeSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(max_length=150, validators=[])
+    email = serializers.EmailField(validators=[])
+
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
