@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import action
 
 from reviews.models import Category, Genre, Review, Title
 from users.models import User
@@ -23,32 +24,31 @@ class APIUserSignup(APIView):
 
     def post(self, request):
         serializer = UserSignupSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class APIUserGetToken(APIView):
 
     def post(self, request):
         serializer = UserGetTokenSerializer(data=request.data)
-        if serializer.is_valid():
-            user = get_object_or_404(
-                User,
-                username=serializer.data['username']
-            )
-            if request.data['confirmation_code'] == user.confirmation_code:
-                refresh = RefreshToken.for_user(user)
-                token = str(refresh.access_token)
-                data = {
-                    "token": token
-                }
-                return Response(data=data, status=status.HTTP_200_OK)
-            raise serializers.ValidationError({
-                'confirmation_code': 'Неверный код подтверждения'
-            })
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        user = get_object_or_404(
+            User,
+            username=serializer.validated_data['username']
+        )
+        if serializer.validated_data[
+            'confirmation_code'] == user.confirmation_code:
+            refresh = RefreshToken.for_user(user)
+            token = str(refresh.access_token)
+            data = {
+                'token': token
+            }
+            return Response(data=data, status=status.HTTP_200_OK)
+        raise serializers.ValidationError({
+            'confirmation_code': 'Неверный код подтверждения'
+        })
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -59,21 +59,26 @@ class UserViewSet(viewsets.ModelViewSet):
     search_fields = ('username',)
     permission_classes = (IsAdminOrSuperuserOnly,)
 
-
-class UpdateRetrieveViewSet(mixins.UpdateModelMixin, mixins.RetrieveModelMixin,
-                            viewsets.GenericViewSet):
-    pass
-
-
-class UserMeViewSet(UpdateRetrieveViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserMeSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def get_object(self):
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=[IsAuthenticated],
+        url_path='me'
+    )
+    def get_me(self, request):
         queryset = self.get_queryset()
-        obj = get_object_or_404(queryset, id=self.request.user.id)
-        return obj
+        instance = get_object_or_404(queryset, id=self.request.user.id)
+        serializer = UserMeSerializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @get_me.mapping.patch
+    def patch_me(self, request):
+        queryset = self.get_queryset()
+        instance = get_object_or_404(queryset, id=self.request.user.id)
+        serializer = UserMeSerializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
