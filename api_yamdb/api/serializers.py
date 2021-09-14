@@ -41,9 +41,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserMeSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(max_length=150, required=False)
-    email = serializers.EmailField(required=False)
-
     class Meta:
         model = User
         fields = (

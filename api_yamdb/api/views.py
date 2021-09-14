@@ -75,7 +75,11 @@ class UserViewSet(viewsets.ModelViewSet):
     def patch_me(self, request):
         queryset = self.get_queryset()
         instance = get_object_or_404(queryset, id=self.request.user.id)
-        serializer = UserMeSerializer(instance, data=request.data)
+        serializer = UserMeSerializer(
+            instance,
+            data=request.data,
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data, status=status.HTTP_200_OK)
