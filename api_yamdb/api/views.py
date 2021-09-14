@@ -17,7 +17,9 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitleRatingSerializer, TitleSerializer,
                           UserGetTokenSerializer, UserMeSerializer,
-                          UserSerializer, UserSignupSerializer)
+                          UserSerializer, UserSignupSerializer,
+                          UserRemindConfirmationCodeSerializer)
+from users.utilities import remind_confirmation_code
 
 
 class APIUserSignup(APIView):
@@ -49,6 +51,23 @@ class APIUserGetToken(APIView):
         raise serializers.ValidationError({
             'confirmation_code': 'Неверный код подтверждения'
         })
+
+
+class APIUserRemindConfirmationCode(APIView):
+
+    def post(self, request):
+        serializer = UserRemindConfirmationCodeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.data['username']
+        email = serializer.data['email']
+        if User.objects.filter(username=username, email=email).exists():
+            user = get_object_or_404(User, username=username)
+            remind_confirmation_code(user)
+            return Response(
+                data=serializer.data,
+                status=status.HTTP_200_OK
+            )
+        raise serializers.ValidationError('Неверные username или email')
 
 
 class UserViewSet(viewsets.ModelViewSet):
